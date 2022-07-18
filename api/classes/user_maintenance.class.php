@@ -10,17 +10,23 @@
 
         function createUser($PersonArr) : bool {
             $EncryptedPassword = password_hash($PersonArr['Password'], PASSWORD_DEFAULT);
-            error_log($EncryptedPassword);
+            error_log("Encrypted Password: ". $EncryptedPassword);
             $SqlStr = "INSERT INTO `Users` (`FirstName`, `LastName`, `EmailAddress`, `Username`, `Password`) VALUES ('".
                 $PersonArr['FirstName']."', '".$PersonArr['LastName']."', '".$PersonArr['EmailAddress'].
                 "', '".$PersonArr['Username']."', '".$EncryptedPassword."')";
 
-            return $this->ConnectionObj->query($SqlStr);
+            $Result = $this->ConnectionObj->query($SqlStr);
+
+            if ($PersonArr) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
-        function loadUser($Username) : array | bool {
+        function loadUser($UsernameStr) : array | bool {
             $ResultArr = array();
-            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress` FROM `Users` WHERE `Username`='".$Username."'";
+            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress`, `Username` FROM `Users` WHERE `Username`='".$UsernameStr."'";
 
             $ResultObj = $this->ConnectionObj->query($SqlStr);
 
@@ -29,7 +35,8 @@
                     $ResultArr[] = array(
                         "FirstName" => $RowArr["FirstName"],
                         "LastName" => $RowArr["LastName"],
-                        "Email" => $RowArr["EmailAddress"]
+                        "Email" => $RowArr["EmailAddress"],
+                        "Username" => $RowArr["Username"]
                     );
                 }
                 return $ResultArr;
@@ -38,31 +45,34 @@
             }
         }
 
-        function loadAllUsers() : array | bool {
-            $ResultArr = array();
-            $SqlStr = "SELECT * FROM `Users`";
+        function loadAllUserCardDetails() : array | bool {
+            $UsersArray = array();
+            $SqlStr = "SELECT `FirstName`, `LastName`, `Username`, `id` FROM `Users`";
 
             $ResultObj = $this->ConnectionObj->query($SqlStr);
 
-            if($ResultObj->num_rows > 0) {
-                while($RowArr = $ResultObj->fetch_assoc()){
-                    $ResultArr[] = array(
+            if ($ResultObj) {
+                while ($RowArr = $ResultObj->fetch_assoc()){
+                    $UsersArray[] = array(
+                        "UserID" => $RowArr["id"],
+                        "Username" => $RowArr["Username"],
                         "FirstName" => $RowArr["FirstName"],
-                        "LastName" => $RowArr["LastName"],
-                        "EmailAddress" => $RowArr["EmailAddress"],
-                        "Username" => $RowArr["Username"]
+                        "LastName" => $RowArr["LastName"]
                     );
                 }
-                return $ResultArr;
+                return $UsersArray;
             } else {
                 return false;
             }
         }
 
-        function saveUser($CurrentUserNameStr, $NewDataArr) : bool {
+        function saveUser($RequestDataArr) : bool {
+            $CurrentUsernameStr = $RequestDataArr["CurrentUsername"];
+            $NewDataArr = $RequestDataArr["NewData"];
+
             $SqlStr = "UPDATE `Users` SET `FirstName`='".$NewDataArr["FirstName"]."',`LastName`='".
                 $NewDataArr["LastName"]."',`EmailAddress`='".$NewDataArr["EmailAddress"]."'".
-                ",`Username`='".$NewDataArr["Username"]."' WHERE Username='".$CurrentUserNameStr."'";
+                ",`Username`='".$NewDataArr["Username"]."' WHERE Username='".$CurrentUsernameStr."'";
 
             return $this->ConnectionObj->query($SqlStr);
         }
@@ -78,11 +88,6 @@
         function deleteUser($Username) : bool {
             $SqlStr = "DELETE FROM `Users` WHERE `Username`='".$Username."'";
 
-            return $this->ConnectionObj->query($SqlStr);
-        }
-
-        function deleteAllUsers() : bool {
-            $SqlStr = "DELETE FROM `Users`";
             return $this->ConnectionObj->query($SqlStr);
         }
     }

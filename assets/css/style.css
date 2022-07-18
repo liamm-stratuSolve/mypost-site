@@ -1,0 +1,23 @@
+body {
+    /*padding: 25px;*/
+}
+
+* {
+    font-family: Karla, sans-serif;
+    /*color: aqua;*/
+}
+
+blockquote {
+    padding: 10px;
+}
+
+#cardWrapper {
+    margin-top: 25px;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.nav {
+    margin: 25px;
+}
+

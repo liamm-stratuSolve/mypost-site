@@ -49,7 +49,7 @@ class managePosts {
         return $this->generateResults($ResultObj);
     }
 
-    function loadAllPost() : array | bool {
+    function loadAllPosts() : array | bool {
         $SqlStr = "SELECT * FROM `Posts`";
 
         $ResultObj = $this->ConnectionObj->query($SqlStr);
@@ -58,6 +58,7 @@ class managePosts {
     }
 
     function generateResults($ResultObj) : array | bool {
+        $ResultArray = array();
         if($ResultObj->num_rows > 0) {
             while($RowArr = $ResultObj->fetch_assoc()) {
                 $ResultArray[] = array(
