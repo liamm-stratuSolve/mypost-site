@@ -26,7 +26,8 @@
 
         function loadUser($UsernameStr) : array | bool {
             $ResultArr = array();
-            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress`, `Username` FROM `Users` WHERE `Username`='".$UsernameStr."'";
+            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress`, `Username` FROM `Users` WHERE `Username`='".
+                $UsernameStr."'";
 
             $ResultObj = $this->ConnectionObj->query($SqlStr);
 
@@ -41,7 +42,7 @@
                 }
                 return $ResultArr;
             } else {
-                return $ResultObj;
+                return false;
             }
         }
 
@@ -66,15 +67,31 @@
             }
         }
 
-        function saveUser($RequestDataArr) : bool {
+        function saveUser($RequestDataArr) : bool | string {
             $CurrentUsernameStr = $RequestDataArr["CurrentUsername"];
             $NewDataArr = $RequestDataArr["NewData"];
+
+            if($CurrentUsernameStr !== $NewDataArr["Username"]) {
+                $ValidateSql = "SELECT * FROM `Users` WHERE `Username`='" . $NewDataArr["Username"] . "'";
+                $ValidateResponse = $this->ConnectionObj->query($ValidateSql);
+
+                if($ValidateResponse->num_rows > 0) {
+                    die(false);
+                }
+            }
+
 
             $SqlStr = "UPDATE `Users` SET `FirstName`='".$NewDataArr["FirstName"]."',`LastName`='".
                 $NewDataArr["LastName"]."',`EmailAddress`='".$NewDataArr["EmailAddress"]."'".
                 ",`Username`='".$NewDataArr["Username"]."' WHERE Username='".$CurrentUsernameStr."'";
 
-            return $this->ConnectionObj->query($SqlStr);
+            $ResultObj = $this->ConnectionObj->query($SqlStr);
+
+            if($ResultObj){
+                return $NewDataArr["Username"];
+            } else {
+                die(false);
+            }
         }
 
         function updatePassword($Username, $NewPassword) : bool {

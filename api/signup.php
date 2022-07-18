@@ -12,8 +12,12 @@ $ActionStr = $RequestDataArr["Action"];
 $RequestDataObj = $RequestDataArr["Data"];
 
 switch ($ActionStr) {
+    case "updateUser":
+        $ResultObj = $UserMaintenance->saveUser($RequestDataObj);
+        echo json_encode($ResultObj);
+        break;
+
     case "loadUser":
-        error_log("Here");
         $ResultObj = $UserMaintenance->loadUser($RequestDataObj);
         if(count($ResultObj) > 0) {
             echo json_encode($ResultObj);

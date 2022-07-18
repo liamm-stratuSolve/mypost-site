@@ -3,16 +3,14 @@ function loadHomePage() {
     let responseRequest = {"Action": "getAllPosts"};
     let responseJson = [];
 
-    let cardContainer = document.createElement("div");
+    let rootDiv = document.getElementById("root");
+    rootDiv.innerHTML = "";
 
     let cardWrapper = document.createElement("div");
     cardWrapper.id = "cardWrapper";
     cardWrapper.className = "row g-3";
-    cardContainer.appendChild(cardWrapper);
 
     generateNavBar();
-
-    let rootDiv = document.getElementById("root");
     rootDiv.appendChild(cardWrapper);
 
 
@@ -56,6 +54,7 @@ function generateNavBar(){
         'click', () => {
             event.preventDefault();
             event.stopImmediatePropagation();
+
             loadProfile();
         }
     );
@@ -168,15 +167,4 @@ function editPost(cardText, cardID) {
             }
         }
     )
-}
-
-function generateNavbar() {
-
-}
-
-class profilePage {
-    constructor() {
-    }
-
-
 }

@@ -1,10 +1,5 @@
-body {
-    /*padding: 25px;*/
-}
-
 * {
     font-family: Karla, sans-serif;
-    /*color: aqua;*/
 }
 
 blockquote {
@@ -19,5 +14,14 @@ blockquote {
 
 .nav {
     margin: 25px;
+}
+
+.nav-link:hover {
+    cursor: pointer;
+}
+
+#profileCard {
+    padding-left: 0;
+    padding-right: 0;
 }
 
