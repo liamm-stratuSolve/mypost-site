@@ -1,16 +1,31 @@
 function loadLoginPage() {
-    let formContainer = document.getElementById("root");
+    let rootContainer = document.getElementById("root");
+    rootContainer.innerHTML = "";
+
+    let cardWrapper = document.createElement("div");
+    cardWrapper.id = "logInCardWrapper";
+    cardWrapper.className = "row g-3 justify-content-center";
+
+    let cardDiv = document.createElement("div");
+    cardDiv.className = "card text-center";
+    cardDiv.id = "profileCard";
+    cardWrapper.appendChild(cardDiv);
+
+    let cardHeader = document.createElement("h5");
+    cardHeader.className = "card-header";
+    cardHeader.innerText = "Log In";
+    cardDiv.appendChild(cardHeader);
+
+    let cardBody = document.createElement("div");
+    cardBody.className = "card-body";
 
     let loginForm = document.createElement("form");
     loginForm.id = "loginForm";
-    loginForm.className = "row g-3";
-
-    let loginHeader = document.createElement("h3");
-    loginHeader.innerText = "Log In" ;
-    loginForm.appendChild(loginHeader);
+    loginForm.className = "row g-3 justify-content-center";
 
     let divUsername = document.createElement("div");
-    divUsername.className = "col-md-4";
+    divUsername.className = "col-md-10";
+    divUsername.id = "inputDiv";
 
     let usernameLabel = document.createElement("label");
     usernameLabel.for = "validationTooltip01";
@@ -28,7 +43,8 @@ function loadLoginPage() {
     loginForm.appendChild(divUsername);
 
     let divPassword = document.createElement("div");
-    divPassword.className = "col-md-4";
+    divPassword.className = "col-md-10";
+    divPassword.id = "inputDiv";
 
     let passwordLabel = document.createElement("label");
     passwordLabel.for = "validationTooltipPassword";
@@ -46,14 +62,18 @@ function loadLoginPage() {
     loginForm.appendChild(divPassword);
 
     let submitDiv = document.createElement("div");
-    submitDiv.className = "col-12";
+    submitDiv.className = "col-md-10 justify-content-center";
+    submitDiv.id = "btnDiv";
 
     let submitBtn = document.createElement("button");
     submitBtn.className = "btn btn-primary";
     submitBtn.innerText = "Submit";
     submitDiv.appendChild(submitBtn);
     loginForm.appendChild(submitDiv);
-    formContainer.appendChild(loginForm);
+
+    cardBody.appendChild(loginForm);
+    cardDiv.appendChild(cardBody);
+    rootContainer.appendChild(cardWrapper);
 
     loginForm.addEventListener(
         'submit', function(event) {
@@ -64,57 +84,68 @@ function loadLoginPage() {
     );
 
     let registerBtn = document.createElement("p");
-    registerBtn.className = "Register link";
+    registerBtn.id = "registerLink";
     registerBtn.innerText = "Don't have an account? Signup here!";
     registerBtn.addEventListener(
         'click', () => {
             loadRegistrationPage();
         }
     );
-
-    formContainer.appendChild(registerBtn);
-
+    loginForm.appendChild(registerBtn);
 }
 
 function validateLoginInputs() {
     let loginForm = document.getElementById("loginForm");
     let loginDetails = [];
-    let username = "";
-    let password = "";
 
     if (loginForm["Username"].value.length > 0 && loginForm["Password"].value.length > 0) {
-        username = loginForm["Username"].value;
-        password = loginForm["Password"].value;
-
         loginDetails = {
-            "Username": username,
-            "Password": password
+                "Username": loginForm["Username"].value,
+                "Password": loginForm["Password"].value
         };
 
         validateLogin(loginDetails);
+
     } else {
-        alert("Please enter your email and password!");
+        Swal.fire("Error:", "Please enter your Username and Password!", "error");
     }
 }
 
 function validateLogin(loginCredentials){
-    let username = loginCredentials["Username"];
-    let requestArray = JSON.stringify({"Action": "logIn", "Data": loginCredentials});
+    let requestArray = JSON.stringify({
+        "Action": "logIn",
+        "Data": loginCredentials,
+        "Session": sessionStorage.getItem('sessionID')
+    });
 
-    $.post('./api/login.php', requestArray)
-        .done(function(data){
+    $.post('api/login.php', requestArray, function(data){
             if (data) {
-                sessionStorage.setItem('status', 'loggedIn');
-                sessionStorage.setItem('Username', username);
-
-                let loginFormElement = document.getElementById("root");
-                loginFormElement.innerHTML = "";
+                console.log(data);
                 pageLoader();
             } else {
-                alert("Invalid login details");
+                Swal.fire("Invalid login details", "", "error");
             }
         })
         .fail(function () {
-                alert("Failed to log in");
+            Swal.fire(
+                "Error:",
+                "Failed to log in",
+                "error"
+            );
+        });
+}
+
+function logout() {
+    console.log("Here");
+    let requestData = {
+        "Action": "logOut",
+        "Data": ""
+    };
+
+    $.post("api/login.php", JSON.stringify(requestData),
+        function (data) {
+            if (data) {
+                setTimeout("location.reload()", 1);
+            }
         });
 }

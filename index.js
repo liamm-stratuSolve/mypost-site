@@ -1,12 +1,35 @@
-function pageLoader(){
-    let sessionStatus = sessionStorage.getItem('status');
-    let sessionUserName = sessionStorage.getItem('Username');
+function pageLoader() {
+        let requestData = JSON.stringify({
+            "Action": "validateLoginState",
+            "Data": ""
+        });
 
-    if (sessionStatus === "loggedIn" && sessionUserName) {
-        loadHomePage();
-    } else {
-        loadLoginPage();
-    }
+        $.post("api/login.php", requestData,
+            function (data) {
+                if (data) {
+                    console.log(data)
+                    loadHomePage();
+                } else {
+                    Swal.fire('You are not logged in.', 'Please log in.', 'info');
+                    loadLoginPage();
+                }
+            });
+}
+
+function startSession(){
+    let requestData = JSON.stringify({
+        "Action": "startSession",
+        "Data": ""
+    });
+
+    $.post("api/login.php", requestData,
+        function (data) {
+            if(data) {
+                pageLoader();
+            } else {
+                console.log("Error:","Could not start session.", "error");
+            }
+        });
 }
 
 function alertMessage(header, message, method) {
@@ -52,13 +75,15 @@ function alertMessage(header, message, method) {
     modalButton.className = "btn btn-primary";
     modalButton.setAttribute("data-dismiss", "modal");
     modalButton.setAttribute("data-target", "#modalCentered");
-    modalButton.innerText = "Close";
+    modalButton.innerText = "Okay";
 
     modalButton.addEventListener(
         'click', () => {
             $("#modalCentered").modal('hide');
             $("#modalCentered").remove();
-            method();
+            if(method){
+                method();
+            }
         }
     )
 

@@ -3,17 +3,31 @@ function loadRegistrationPage() {
     let rootContainer = document.getElementById("root");
     rootContainer.innerHTML = "";
 
+    let cardWrapper = document.createElement("div");
+    cardWrapper.id = "registrationCardWrapper";
+    cardWrapper.className = "row g-3 justify-content-center";
+
+    let cardDiv = document.createElement("div");
+    cardDiv.className = "card text-center";
+    cardDiv.id = "profileCard";
+    cardWrapper.appendChild(cardDiv);
+
+    let cardHeader = document.createElement("h5");
+    cardHeader.className = "card-header";
+    cardHeader.innerText = "Registration";
+    cardDiv.appendChild(cardHeader);
+
+    let cardBody = document.createElement("div");
+    cardBody.className = "card-body";
+    cardDiv.appendChild(cardBody);
+
     let registrationForm = document.createElement("form");
     registrationForm.id = "registrationForm";
-    registrationForm.className = "row g-3";
-
-    let registrationHeader = document.createElement("h3");
-    registrationHeader.innerText = "Registration";
-    registrationForm.appendChild(registrationHeader);
+    registrationForm.className = "row g-3 justify-content-center";
 
     //Email Input
     let divEmail = document.createElement("div");
-    divEmail.className = "col-md-4";
+    divEmail.className = "col-md-10";
 
     let emailLabel = document.createElement("label");
     emailLabel.for = "regEmailAddress";
@@ -32,7 +46,7 @@ function loadRegistrationPage() {
 
     //Username input
     let divUsername = document.createElement("div");
-    divUsername.className = "col-md-4";
+    divUsername.className = "col-md-10";
 
     let usernameLabel = document.createElement("label");
     usernameLabel.for = "regUsername";
@@ -51,7 +65,7 @@ function loadRegistrationPage() {
 
     //FirstName Input
     let divFName = document.createElement("div");
-    divFName.className = "col-md-4";
+    divFName.className = "col-md-10";
 
     let firstNameLabel = document.createElement("label");
     firstNameLabel.for = "regFName";
@@ -70,7 +84,7 @@ function loadRegistrationPage() {
 
     //Last Name Input
     let divLName = document.createElement("div");
-    divLName.className = "col-md-4";
+    divLName.className = "col-md-10";
 
     let lastNameLabel = document.createElement("label");
     lastNameLabel.for = "regLastName";
@@ -89,7 +103,8 @@ function loadRegistrationPage() {
 
     //Password Input
     let divPassword = document.createElement("div");
-    divPassword.className = "col-md-4";
+    divPassword.id = "passwordDiv";
+    divPassword.className = "col-md-10";
 
     let passwordLabel = document.createElement("label");
     passwordLabel.for = "regPassword";
@@ -122,14 +137,13 @@ function loadRegistrationPage() {
     registrationForm.appendChild(divPassword);
 
     let submitDiv = document.createElement("div");
-    submitDiv.className = "col-12";
+    submitDiv.className = "col-md-10 justify-content-";
+    submitDiv.id = "btnDiv";
 
     let submitBtn = document.createElement("button");
     submitBtn.className = "btn btn-primary";
     submitBtn.innerText = "Submit";
     submitDiv.appendChild(submitBtn);
-    registrationForm.appendChild(submitDiv);
-    rootContainer.appendChild(registrationForm);
 
     registrationForm.addEventListener(
         'submit', function (event) {
@@ -138,6 +152,24 @@ function loadRegistrationPage() {
             validateRegistrationInputs();
         }
     );
+
+    let cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn btn-secondary offset-2";
+    cancelBtn.innerText = "Cancel";
+    submitDiv.appendChild(cancelBtn);
+
+    cancelBtn.addEventListener(
+        'click', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            document.getElementById("root").innerHTML = "";
+            loadLoginPage();
+        }
+    );
+
+    registrationForm.appendChild(submitDiv);
+    cardBody.appendChild(registrationForm);
+    rootContainer.appendChild(cardWrapper);
 }
 
 function validateRegistrationInputs() {
@@ -158,9 +190,10 @@ function validateRegistrationInputs() {
 
         createUser(registrationDetails);
     } else if (registrationForm["Password"].value !== registrationForm["ConfirmPassword"].value) {
-        alert("Passwords do not match...");
+        Swal.fire("Error:", "Passwords do not match...", "error");
+        $("#modalCentered").modal('show');
     } else {
-        alert("Please complete all fields!");
+        Swal.fire("Error:", "Please complete all fields!", "error");
     }
 }
 
@@ -169,16 +202,17 @@ function createUser(registrationDetails) {
 
     $.post('api/signup.php', data,
         function (response) {
-            if (response) {
-                alert("User Created! \nPlease log in with your details");
-            } else {
-                alert("User not created...")
+            if (!response) {
+                Swal.fire("Error:","User not created.", "error");
             }
         })
         .done ( function () {
-            let loginFormElement = document.getElementById("root");
-            loginFormElement.innerHTML = "";
-            pageLoader();
+            Swal.fire(
+                "Success!",
+                "Please log in with your details.",
+                "success"
+                );
+            loadLoginPage();
         })
         .fail ( function (error) {
             alert ("Error creating your user...\n" + JSON.stringify(error));

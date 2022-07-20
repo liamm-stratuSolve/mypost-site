@@ -8,11 +8,11 @@ function loadHomePage() {
 
     let cardWrapper = document.createElement("div");
     cardWrapper.id = "cardWrapper";
-    cardWrapper.className = "row g-3";
+    cardWrapper.className = "row g-4";
 
     generateNavBar();
     rootDiv.appendChild(cardWrapper);
-
+    generateCreatePostCard();
 
     $.post("api/home_page.php", JSON.stringify(responseRequest))
         .done(function (response) {
@@ -32,41 +32,43 @@ function generateNavBar(){
     let rootDiv = document.getElementById("root");
 
     let navBar = document.createElement("nav");
-    navBar.className = "nav nav-pills nav-fill";
+    navBar.className = "nav fixed-top nav-pills nav-fill";
 
-    let navTitle = document.createElement("h3");
+    let navTitle = document.createElement("h1");
     navTitle.innerText = "MyPost";
     navTitle.className = "nav-item boldHeading";
     navTitle.id = "navHeaderTitle";
     navBar.appendChild(navTitle);
 
-    let navItemCreate = document.createElement("a");
-    navItemCreate.className = "nav-item nav-link";
-    navItemCreate.innerText = "Create a new post";
-    navBar.appendChild(navItemCreate);
-
     let navItemProfile = document.createElement("a");
-    navItemProfile.className = "nav-item nav-link";
+    navItemProfile.className = "nav-item nav-link offset-2";
     navItemProfile.innerText = "Your Profile";
     navBar.appendChild(navItemProfile);
+
+    let navItemLogout = document.createElement("a");
+    navItemLogout.className = "nav-item nav-link navLogout";
+    navItemLogout.innerText = "Log Out";
+    navBar.appendChild(navItemLogout);
 
     navItemProfile.addEventListener(
         'click', () => {
             event.preventDefault();
             event.stopImmediatePropagation();
-
             loadProfile();
         }
     );
 
-    rootDiv.appendChild(navBar);
+    navItemLogout.addEventListener(
+        'click', () => {
+            logout();
+        }
+    );
 
+    rootDiv.appendChild(navBar);
 }
 
 function generatePostCard(cardDetails){
 
-    // console.log(cardDetails);
-    let cardUserID = "user" + cardDetails["UserID"];
     let cardID = cardDetails["PostID"];
 
     let cardWrapDiv = document.createElement("div");
@@ -79,16 +81,20 @@ function generatePostCard(cardDetails){
     let cardHeader = document.createElement("div");
     cardHeader.className = "card-header";
 
+    let headerSpan = document.createElement("span");
+    headerSpan.className = "col-sm-12 d-flex flex-row align-items-center justify-content-between";
+    cardHeader.appendChild(headerSpan);
+
     let usernameHeader = document.createElement("h4");
-    usernameHeader.innerText = cardDetails["Username"] + " - ";
-    cardHeader.appendChild(usernameHeader);
+    usernameHeader.innerText = cardDetails["Username"];
+    headerSpan.appendChild(usernameHeader);
 
     let postDate = document.createElement("h6");
     let timeStamp = new Date(cardDetails["PostTimeStamp"]).toLocaleDateString('en-us', { weekday:"short",
         year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"numeric", hour12: false});
-    cardHeader.appendChild(postDate);
-    cardDiv.appendChild(cardHeader);
     postDate.innerText = timeStamp;
+    headerSpan.appendChild(postDate);
+    cardDiv.appendChild(cardHeader);
 
     let cardBody = document.createElement("div");
     cardBody.className = "card-body";
@@ -104,67 +110,151 @@ function generatePostCard(cardDetails){
     cardDiv.appendChild(blockQuote);
     cardWrapDiv.appendChild(cardDiv);
 
-    // let editButton = document.createElement("button");
-    // editButton.className="btn btn-secondary";
-    // editButton.id = "editBtn" + cardID ;
-    // editButton.innerText = "Edit Post";
-    // cardDiv.appendChild(editButton);
-    //
-    // editButton.addEventListener(
-    //     'click', function () {
-    //         editPost(cardDetails["PostText"], cardID);
-    //     }
-    // );
-
     let rootDiv = document.getElementById("cardWrapper");
     rootDiv.appendChild(cardWrapDiv);
 }
 
-function editPost(cardText, cardID) {
+function generateCreatePostCard() {
+    let rootContainer = document.getElementById("cardWrapper");
 
-    let cardBody = document.getElementById("bodyText" + cardID);
-    let editBtn = document.getElementById(  "editBtn" + cardID);
-    let blockQuote = document.getElementById("blockQuote" + cardID);
-    let cardDiv = document.getElementById("divID" + cardID);
+    let createPostChecker = document.getElementById("newCreatePostCard");
+    if(createPostChecker) {
+        createPostChecker.remove();
+    }
 
-    let cardBodyText = document.createElement("textarea");
-    cardBodyText.class = "form-control";
-    cardBodyText.name = "PostText"
-    cardBodyText.id = "inputText" + cardID;
-    cardBodyText.value = cardText;
+    let  cardContainer = document.createElement("div");
+    cardContainer.className = "col-sm-12 text-left";
+    cardContainer.id = "newCreatePostCard";
 
-    let submitBtn = document.createElement("button");
-    submitBtn.className="btn btn-primary";
-    submitBtn.innerText = "Submit";
+    let cardDiv = document.createElement("div");
+    cardDiv.className = "card text-center";
+    cardContainer.appendChild(cardDiv)
 
-    cardBody.remove();
-    editBtn.remove();
-    blockQuote.insertBefore(cardBodyText, blockQuote.firstChild);
-    cardDiv.appendChild(submitBtn);
+    let cardHeader = document.createElement("h5");
+    cardHeader.className = "card-header";
+    cardHeader.innerText = "New Post";
+    cardDiv.appendChild(cardHeader);
 
-    submitBtn.addEventListener(
-        'click', function() {
-            let textInput = document.getElementById("inputText" + cardID);
-            if (textInput.value) {
-                let requestData = {
-                        "PostID" : cardID,
-                        "NewPostText" : textInput.value
-                };
+    let cardBody = document.createElement("div");
+    cardBody.className = "card-body";
 
-                let requestArr = JSON.stringify({"Action": "createUser", "Data": requestData});
+    let bodyForm = generateCreatePostForm();
+    cardBody.appendChild(bodyForm);
+    cardDiv.appendChild(cardBody);
 
-                console.log(requestArr);
-                $.post ("api/home_page.php", requestArr,
-                    function (data) {
-                        if (data) {
-                            let rootDiv = document.getElementById("root");
-                            rootDiv.innerHTML = "";
-                            loadHomePage();
-                        } else {
-                            console.log("Failed");
-                        }
-                });
-            }
+
+    rootContainer.appendChild(cardContainer);
+}
+
+function generateCreatePostForm(){
+    let createForm = document.createElement("form");
+    createForm.id = "createForm";
+    createForm.className = "row g-3 justify-content-center";
+
+    let postTextDiv = document.createElement("div");
+    postTextDiv.className = "col-md-10 text-left";
+    postTextDiv.id = "newPostCard";
+
+    let postTextLabel = document.createElement("label");
+    postTextLabel.for = "createPostText";
+    postTextLabel.className = "form-label";
+    postTextLabel.innerText = "Whatcha thinking?";
+    postTextDiv.appendChild(postTextLabel);
+
+    let postTextInput = document.createElement("textarea");
+    postTextInput.type = "text";
+    postTextInput.name = "CreatePostText";
+    postTextInput.className = "form-control";
+    postTextInput.id = "createPostText";
+    postTextInput.rows = 5;
+    postTextInput.setAttribute("required", "");
+    postTextDiv.appendChild(postTextInput);
+    createForm.appendChild(postTextDiv)
+
+    postTextInput.addEventListener(
+        'keyup', () => {
+            characterCounter();
         }
     )
+
+    let btnDiv = document.createElement("div");
+    btnDiv.className = "d-flex justify-content-around";
+
+    let submitButton = document.createElement("button");
+    submitButton.className = "btn btn-primary col-4";
+    submitButton.setAttribute("data-dismiss", "modal");
+    submitButton.setAttribute("data-target", "#modalCentered");
+    submitButton.innerText = "Submit";
+
+    submitButton.addEventListener(
+        'click', () => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            validateInput();
+        }
+    )
+
+    btnDiv.appendChild(submitButton);
+
+    let counterBtn = document.createElement("button");
+    counterBtn.id = "counterBtn"
+    counterBtn.className = "btn btn-secondary col-4";
+    counterBtn.innerText = "Word Count: 0/350";
+
+    counterBtn.addEventListener(
+        'click', () => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    )
+
+    btnDiv.appendChild(counterBtn);
+
+    createForm.appendChild(btnDiv);
+
+    return createForm;
+}
+
+function characterCounter() {
+    let maxLimit = 350;
+    let counterBtn = document.getElementById("counterBtn");
+    let textInput = document.getElementById("createPostText");
+    let currentCount = textInput.value.length;
+    counterBtn.innerText = "Word Count: " + currentCount + "/350";
+    if (currentCount > maxLimit) {
+        counterBtn.className = "btn overCount col-4";
+    } else {
+        counterBtn.className = "btn btn-secondary col-4";
+    }
+}
+
+function validateInput() {
+    let postTextForm = document.getElementById("createForm");
+    let requestArray = [];
+    let validationString = postTextForm['CreatePostText'].value.replace(/\s/g, '');
+
+    if (validationString.length > 0) {
+        requestArray = {
+            "Action" : "createPost",
+            "Data" : {
+                "PostText" : postTextForm['CreatePostText'].value
+            }
+        }
+
+        createPost(requestArray);
+    } else {
+        Swal.fire("Error", "Please fill in the field.", "error");
+    }
+}
+
+function createPost(dataArray) {
+    let requestData = JSON.stringify(dataArray);
+
+    $.post("api/home_page.php", requestData, function (data) {
+        if(data) {
+            loadHomePage();
+        } else {
+            Swal.fire("Error:", "Error creating post", "error");
+        }
+    });
 }

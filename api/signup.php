@@ -12,21 +12,31 @@ $ActionStr = $RequestDataArr["Action"];
 $RequestDataObj = $RequestDataArr["Data"];
 
 switch ($ActionStr) {
+    case "updatePassword":
+        session_start();
+        $ResultObj = $UserMaintenance->updatePassword($RequestDataObj);
+        echo $ResultObj;
+        break;
+
     case "updateUser":
+        session_start();
         $ResultObj = $UserMaintenance->saveUser($RequestDataObj);
         echo json_encode($ResultObj);
         break;
 
     case "loadUser":
-        $ResultObj = $UserMaintenance->loadUser($RequestDataObj);
+        session_start();
+        $ResultObj = $UserMaintenance->loadUser($_SESSION['Username']);
+        error_log(json_encode($ResultObj));
         if(count($ResultObj) > 0) {
             echo json_encode($ResultObj);
-        } else {
+        } else if ($ResultObj === false) {
             echo false;
         }
         break;
 
     case "createUser":
+        session_start();
         $ResultObj = $UserMaintenance->createUser($RequestDataObj);
         echo $ResultObj;
         break;

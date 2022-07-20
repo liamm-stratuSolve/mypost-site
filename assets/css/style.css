@@ -2,22 +2,119 @@
     font-family: Karla, sans-serif;
 }
 
+body {
+    padding-bottom: 25px;
+    margin: 0;
+    overflow: auto;
+    background-image: linear-gradient(to right, rgb(91, 0, 129) 0%, rgb(40, 0, 40) 100%);
+}
+
+#passwordDiv {
+    /*gap: 5px;*/
+}
+
+.form-label {
+    font-size: 30px;
+}
+
+.btn {
+    font-size: 25px;
+}
+
+.form-control {
+    font-size: 25px;
+}
+
+#registerLink {
+    font-size: 25px;
+}
+
 blockquote {
     padding: 10px;
 }
 
+#logInCardWrapper {
+    margin: 10%;
+    margin-top: 5%;
+}
+
+#registrationCardWrapper {
+    margin: 5%;
+    margin-top: 2%;
+}
+
 #cardWrapper {
-    margin-top: 25px;
+    margin-top: 75px;
     padding-left: 10%;
     padding-right: 10%;
 }
 
+#logInCardWrapper {
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+.card {
+    border: none;
+    box-shadow: 5px 10px rgba(255, 255, 255, 0.45);
+    /*background: rgba(2, 0, 0, 0.96);*/
+    /*color: white;*/
+}
+
+.card-header h4 {
+    font-size: 35px !important;
+}
+
+.card-header h6 {
+    font-size: 20px !important;
+}
+
+.blockquote p {
+    font-size: 30px !important;
+}
+
+.form-control {
+    /*background: rgba(2, 0, 0, 0.96);*/
+    border-color: rgba(0, 0, 0, 0.62) !important;
+    color: black !important;
+}
+
+#inputDiv {
+    margin: 15px;
+}
+
+.card-header {
+    background: rgba(2, 0, 0, 0.96);
+    color: white;
+    font-size: 35px;
+}
+
 .nav {
-    margin: 25px;
+    padding: 10px;
+    background-image: linear-gradient(to right, rgb(91, 0, 129) 0%, rgb(40, 0, 40) 100%);
+}
+
+.nav-item {
+    font-size: 25px !important;
+    color: white !important;
+}
+
+.boldHeading {
+    font-size: 50px !important;
+    font-weight: bold !important;
 }
 
 .nav-link:hover {
     cursor: pointer;
+}
+
+.navLogout {
+    color: red !important;
+    font-weight: 700 !important;
+}
+
+.navLogout:hover {
+    color: white !important;
 }
 
 #profileCard {
@@ -25,3 +122,28 @@ blockquote {
     padding-right: 0;
 }
 
+#profileForm .form-label {
+    font-weight: bold;
+}
+
+#profileForm .form-control {
+    border: 1px solid black !important;
+    font-size: 20px !important;
+}
+
+.btn-primary {
+    background-color: rgb(91, 0, 129) !important;
+    border-color: rgb(91, 0, 129) !important;
+}
+
+.btn-primary:hover {
+    background-color: rgb(78, 0, 110) !important;
+    border-color: rgb(78, 0, 110) !important;
+}
+
+.overCount {
+    background-color: red !important;
+    border-color: red !important;
+    color: white !important;
+    font-weight: bold !important;
+}

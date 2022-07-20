@@ -10,14 +10,14 @@
 
         function createUser($PersonArr) : bool {
             $EncryptedPassword = password_hash($PersonArr['Password'], PASSWORD_DEFAULT);
-            error_log("Encrypted Password: ". $EncryptedPassword);
-            $SqlStr = "INSERT INTO `Users` (`FirstName`, `LastName`, `EmailAddress`, `Username`, `Password`) VALUES ('".
-                $PersonArr['FirstName']."', '".$PersonArr['LastName']."', '".$PersonArr['EmailAddress'].
-                "', '".$PersonArr['Username']."', '".$EncryptedPassword."')";
 
-            $Result = $this->ConnectionObj->query($SqlStr);
+            $SqlStr = "INSERT INTO `Users` (`FirstName`, `LastName`, `EmailAddress`, `Username`, `Password`) ".
+                "VALUES ('".$PersonArr['FirstName']."', '".$PersonArr['LastName']."', '".
+                $PersonArr['EmailAddress']."', '".$PersonArr['Username']."', '".$EncryptedPassword."')";
 
-            if ($PersonArr) {
+            $ResultObj = $this->ConnectionObj->query($SqlStr);
+
+            if ($ResultObj) {
                 return true;
             } else {
                 return false;
@@ -26,8 +26,8 @@
 
         function loadUser($UsernameStr) : array | bool {
             $ResultArr = array();
-            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress`, `Username` FROM `Users` WHERE `Username`='".
-                $UsernameStr."'";
+            $SqlStr = "SELECT `FirstName`, `LastName`, `EmailAddress`, `Username` FROM `Users` WHERE ".
+                "`Username`='".$UsernameStr."'";
 
             $ResultObj = $this->ConnectionObj->query($SqlStr);
 
@@ -68,15 +68,15 @@
         }
 
         function saveUser($RequestDataArr) : bool | string {
-            $CurrentUsernameStr = $RequestDataArr["CurrentUsername"];
+            $CurrentUsernameStr = $_SESSION['Username'];
             $NewDataArr = $RequestDataArr["NewData"];
 
             if($CurrentUsernameStr !== $NewDataArr["Username"]) {
                 $ValidateSql = "SELECT * FROM `Users` WHERE `Username`='" . $NewDataArr["Username"] . "'";
-                $ValidateResponse = $this->ConnectionObj->query($ValidateSql);
+                $ValidateResponseObj = $this->ConnectionObj->query($ValidateSql);
 
-                if($ValidateResponse->num_rows > 0) {
-                    die(false);
+                if($ValidateResponseObj->num_rows > 0) {
+                    die();
                 }
             }
 
@@ -90,21 +90,49 @@
             if($ResultObj){
                 return $NewDataArr["Username"];
             } else {
-                die(false);
+                die();
             }
         }
 
-        function updatePassword($Username, $NewPassword) : bool {
-            $EncryptedPassword = password_hash($NewPassword, PASSWORD_DEFAULT);
+        function getUserID($UsernameStr) : bool | string {
+            $SqlStr = "SELECT `id` FROM `Users` WHERE `Username`='".$UsernameStr."'";
+            $UserIDStr = "";
+            $ResultObj = $this->ConnectionObj->query($SqlStr);
 
-            $SqlStr = "UPDATE `Users` SET `Password`='".$EncryptedPassword."' WHERE Username='".$Username."'";
-
-            return $this->ConnectionObj->query($SqlStr);
+            if($ResultObj->num_rows > 0) {
+                while($RowArr = $ResultObj->fetch_assoc()){
+                    $UserIDStr = $RowArr["id"];
+                }
+                return  $UserIDStr;
+            } else {
+                return false;
+            }
         }
 
-        function deleteUser($Username) : bool {
-            $SqlStr = "DELETE FROM `Users` WHERE `Username`='".$Username."'";
+        function updatePassword($RequestDataArr) : bool {
+            $UsernameStr = $_SESSION['Username'];
+            $CurrentPasswordStr = $RequestDataArr["CurrentPassword"];
+            $NewPasswordStr = $RequestDataArr["NewPassword"];
+            $ValidationPasswordStr = "";
 
-            return $this->ConnectionObj->query($SqlStr);
+            $DataBasePasswordObj = $this->ConnectionObj->query("SELECT `Password` FROM `Users` WHERE `Username`='".
+                $UsernameStr."'");
+            if($DataBasePasswordObj->num_rows > 0) {
+                while($RowArr = $DataBasePasswordObj->fetch_assoc()) {
+                    $ValidationPasswordStr = $RowArr["Password"];
+                }
+            }
+
+            $ValidateCurrentPWord = password_verify($CurrentPasswordStr, $ValidationPasswordStr);
+
+            if($ValidateCurrentPWord){
+                $EncryptedPasswordStr = password_hash($NewPasswordStr, PASSWORD_DEFAULT);
+                $SqlStr = "UPDATE `Users` SET `Password`='".$EncryptedPasswordStr."' WHERE Username='".
+                    $UsernameStr."'";
+                $ResultObj = $this->ConnectionObj->query($SqlStr);
+                return json_encode($ResultObj);
+            } else {
+                return json_encode("invalid");
+            }
         }
     }

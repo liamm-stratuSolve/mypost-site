@@ -23,32 +23,6 @@ class managePosts {
         }
     }
 
-    function loadPostByUserID($UserID) : array | bool {
-        $SqlStr = "SELECT `PostID`, `PostTimeStamp`, `PostText`, `UserID` FROM `Posts` WHERE `UserID`='".
-        $UserID."'";
-
-        $ResultObj = $this->ConnectionObj->query($SqlStr);
-
-        return $this->generateResults($ResultObj);
-    }
-
-    function loadPostByPostID($PostID) : array | bool {
-        $SqlStr = "SELECT `PostID`, `PostTimeStamp`, `PostText`, `UserID` FROM `Posts` WHERE `PostID`='".
-            $PostID."'";
-
-        $ResultObj = $this->ConnectionObj->query($SqlStr);
-
-        return $this->generateResults($ResultObj);
-    }
-
-    function loadPostByText($SearchText) : array | bool {
-        $SqlStr = "SELECT * FROM `Posts` WHERE `PostText` LIKE '%".$SearchText."%'";
-
-        $ResultObj = $this->ConnectionObj->query($SqlStr);
-
-        return $this->generateResults($ResultObj);
-    }
-
     function loadAllPosts() : array | bool {
         $SqlStr = "SELECT * FROM `Posts`";
 

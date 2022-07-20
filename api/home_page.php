@@ -9,17 +9,29 @@ $UserMaint = new UserMaintenance($ConnectionObj);
 $DataObj = file_get_contents("php://input");
 $RequestDataArr = json_decode($DataObj, true);
 
-error_log(json_encode($RequestDataArr));
 $ActionStr = $RequestDataArr["Action"];
-error_log($ActionStr);
 
 switch ($ActionStr) {
+
+    case "createPost":
+        session_start();
+        $Username = $_SESSION['Username'];
+        $DataArr = $RequestDataArr["Data"];
+        $PostText = $DataArr["PostText"];
+        $UserID = $UserMaint->getUserID($Username);
+        $ResultObj = $HomePage->createPost($UserID, $PostText);
+
+        if ($ResultObj) {
+            echo true;
+        } else {
+            die(false);
+        }
+        break;
 
     case "getAllPosts":
         $UserListResultArr = $UserMaint->loadAllUserCardDetails();
         $PostCarDetailsArr = $HomePage->loadAllPosts();
         $ResultJson = [];
-//        error_log(json_encode($UserListResultArr));
 
         foreach ($UserListResultArr as $User) {
 
@@ -40,8 +52,8 @@ switch ($ActionStr) {
         break;
 
     case "getCurrentUserDetails":
-        $RequestObj = $RequestDataArr["Data"];
-        $ResultObj = $UserMaint->loadUser($RequestObj);
+        session_start();
+        $ResultObj = $UserMaint->loadUser($_SESSION['Username']);
         if($ResultObj) {
             echo json_encode($ResultObj);
         } else {
@@ -50,8 +62,8 @@ switch ($ActionStr) {
         break;
 
     case "updatePost":
+        session_start();
         $RequestObj = $RequestDataArr["Data"];
-        error_log(json_encode($RequestObj));
         $ResultObj = $HomePage->editPost($RequestObj["PostID"], $RequestObj["NewPostText"]);
         if($ResultObj) {
             echo true;
@@ -61,6 +73,7 @@ switch ($ActionStr) {
         break;
 
     case "updateUserDetails":
+        session_start();
         $RequestObj = $RequestDataArr["Data"];
         $ResultObj = $UserMaint->saveUser($RequestObj);
         if ($ResultObj) {

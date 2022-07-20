@@ -7,7 +7,7 @@ class userLogin {
         $this->ConnectionObj = $ConnectionObj;
     }
 
-    function validateLoginDetails($Username, $Password) {
+    function validateLoginDetails($Username, $Password) : bool{
         $UserPassword = "";
         $SqlStr = "SELECT * FROM `Users` WHERE `Username`='".$Username."'";
 
